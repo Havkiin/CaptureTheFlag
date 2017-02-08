@@ -17,6 +17,7 @@ public class Arrive_Kinematic : MonoBehaviour {
 	float nearRadius = 3.0f;
 	float arrivalRadius = 1.0f;
 	float rotationSpeedRads = 50.0f;
+	bool aligned;
 
 	float distanceFromTarget;
 	Vector3 direction;
@@ -24,24 +25,55 @@ public class Arrive_Kinematic : MonoBehaviour {
 	void FixedUpdate () {
 
 		distanceFromTarget = Vector3.Distance(transform.position, target.transform.position);
-		direction = target.transform.position - transform.position;
-		direction.Normalize();
+		direction = (target.transform.position - transform.position);
+		aligned = Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) < 1.0f;
 
-
-		if (distanceFromTarget > turnRadius && Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) > 1.0f)
+		if (GetComponent<Rigidbody>().velocity.magnitude < 2.0f)
 		{
-			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), rotationSpeedRads * Time.fixedDeltaTime);
+			if (distanceFromTarget > turnRadius && !aligned)
+			{
+				Rotate();
+			}
+			else
+			{
+				Arrive();
+			}
 		}
 		else
 		{
-			if (distanceFromTarget > nearRadius)
+			if (Vector3.Angle(transform.forward, direction) <= 30.0f && distanceFromTarget < 10.0f)
 			{
-				GetComponent<Rigidbody>().AddForce(direction * speed * Time.fixedDeltaTime, ForceMode.Impulse);
+				Rotate();
+				Arrive();
 			}
-			else if (distanceFromTarget > arrivalRadius)
+			else
 			{
-				GetComponent<Rigidbody>().AddForce(direction * nearSpeed * Time.fixedDeltaTime, ForceMode.Impulse);
+				if (!aligned)
+				{
+					Rotate();
+				}
+				else
+				{
+					Arrive();
+				}
 			}
 		}
+	}
+
+	void Arrive()
+	{
+		if (distanceFromTarget > nearRadius)
+		{
+			GetComponent<Rigidbody>().velocity = direction.normalized * speed * Time.fixedDeltaTime;
+		}
+		else if (distanceFromTarget > arrivalRadius)
+		{
+			GetComponent<Rigidbody>().velocity = direction.normalized * nearSpeed * Time.fixedDeltaTime;
+		}
+	}
+
+	void Rotate ()
+	{
+		transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), rotationSpeedRads * Time.fixedDeltaTime);
 	}
 }

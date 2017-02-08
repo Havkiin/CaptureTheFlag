@@ -35,7 +35,6 @@ public class Arrive_Steering : MonoBehaviour {
 			if (distanceFromTarget > nearRadius)
 			{
 				GetComponent<Rigidbody>().AddForce(transform.forward.normalized * speed * Time.fixedDeltaTime, ForceMode.Impulse);
-				Debug.Log(transform.forward.normalized);
 			}
 			else if (distanceFromTarget > arrivalRadius)
 			{

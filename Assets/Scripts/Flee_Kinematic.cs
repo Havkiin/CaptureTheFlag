@@ -19,8 +19,7 @@ public class Flee_Kinematic : MonoBehaviour {
 	void FixedUpdate () {
 
 		distanceFromTarget = Vector3.Distance(transform.position, target.transform.position);
-		direction = transform.position - target.transform.position;
-		direction.Normalize();
+		direction = (transform.position - target.transform.position).normalized;
 
 		if (distanceFromTarget > turnRadius && Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) > 1.0f)
 		{
@@ -28,7 +27,7 @@ public class Flee_Kinematic : MonoBehaviour {
 		}
 		else
 		{
-			GetComponent<Rigidbody>().AddForce(direction * speed * Time.fixedDeltaTime, ForceMode.Impulse);
+			GetComponent<Rigidbody>().velocity = direction * speed * Time.fixedDeltaTime;
 		}
 	}
 }
