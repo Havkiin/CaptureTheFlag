@@ -13,24 +13,29 @@ public class Arrive_Kinematic : MonoBehaviour {
 	[SerializeField]
 	float nearSpeed;
 
-	float turnRadius = 5.0f;
-	float nearRadius = 3.0f;
-	float arrivalRadius = 1.0f;
-	float rotationSpeedRads = 50.0f;
+	Vector3 direction;
+	float nearRadius;
+	float arrivalRadius;
+	float rotationSpeedRads;
+	float distanceFromTarget;
 	bool aligned;
 
-	float distanceFromTarget;
-	Vector3 direction;
+	void Start () {
+
+		nearRadius = 3.0f;
+		arrivalRadius = 1.0f;
+		rotationSpeedRads = 300.0f;
+	}
 	
 	void FixedUpdate () {
 
 		distanceFromTarget = Vector3.Distance(transform.position, target.transform.position);
-		direction = (target.transform.position - transform.position);
+		direction = (target.transform.position - transform.position).normalized;
 		aligned = Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) < 1.0f;
 
-		if (GetComponent<Rigidbody>().velocity.magnitude < 2.0f)
+		if (GetComponent<Rigidbody>().velocity.magnitude < speed * 0.1f)
 		{
-			if (distanceFromTarget > turnRadius && !aligned)
+			if (distanceFromTarget > nearRadius && !aligned)
 			{
 				Rotate();
 			}
@@ -41,7 +46,7 @@ public class Arrive_Kinematic : MonoBehaviour {
 		}
 		else
 		{
-			if (Vector3.Angle(transform.forward, direction) <= 30.0f && distanceFromTarget < 10.0f)
+			if (Mathf.Abs(Vector3.Angle(transform.forward, direction)) <= 30.0f && distanceFromTarget < nearRadius)
 			{
 				Rotate();
 				Arrive();
@@ -50,6 +55,7 @@ public class Arrive_Kinematic : MonoBehaviour {
 			{
 				if (!aligned)
 				{
+					Stop();
 					Rotate();
 				}
 				else
@@ -60,20 +66,25 @@ public class Arrive_Kinematic : MonoBehaviour {
 		}
 	}
 
-	void Arrive()
+	void Arrive ()
 	{
 		if (distanceFromTarget > nearRadius)
 		{
-			GetComponent<Rigidbody>().velocity = direction.normalized * speed * Time.fixedDeltaTime;
+			GetComponent<Rigidbody>().velocity = direction * speed * Time.fixedDeltaTime;
 		}
 		else if (distanceFromTarget > arrivalRadius)
 		{
-			GetComponent<Rigidbody>().velocity = direction.normalized * nearSpeed * Time.fixedDeltaTime;
+			GetComponent<Rigidbody>().velocity = direction * nearSpeed * Time.fixedDeltaTime;
 		}
 	}
 
 	void Rotate ()
 	{
 		transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), rotationSpeedRads * Time.fixedDeltaTime);
+	}
+
+	void Stop ()
+	{
+		GetComponent<Rigidbody>().velocity = Vector3.zero;
 	}
 }

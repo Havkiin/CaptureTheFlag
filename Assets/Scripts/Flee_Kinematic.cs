@@ -10,11 +10,16 @@ public class Flee_Kinematic : MonoBehaviour {
 	[SerializeField]
 	float speed;
 
-	float turnRadius = 5.0f;
-	float rotationSpeedRads = 50.0f;
-
+	float turnRadius;
+	float rotationSpeedRads;
 	float distanceFromTarget;
 	Vector3 direction;
+
+	void Start () {
+
+		turnRadius = 5.0f;
+		rotationSpeedRads = 300.0f;
+	}
 	
 	void FixedUpdate () {
 
