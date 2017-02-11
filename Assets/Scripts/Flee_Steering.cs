@@ -42,22 +42,25 @@ public class Flee_Steering : MonoBehaviour {
 	
 	void FixedUpdate () {
 
-		distanceFromTarget = Vector3.Distance(transform.position, target.transform.position);
-		direction = (transform.position - target.transform.position).normalized;
+		if (target)
+		{
+			distanceFromTarget = Vector3.Distance(transform.position, target.transform.position);
+			direction = (transform.position - target.transform.position).normalized;
 
-		if (distanceFromTarget > turnRadius && Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) > 1.0f)
-		{
-			FaceAway();
-		}
-		else
-		{
-			if (GetComponent<Rigidbody>().velocity.magnitude < velocityMax)
+			if (distanceFromTarget > turnRadius && Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) > 1.0f)
 			{
-				GetComponent<Rigidbody>().velocity += direction * acceleration * Time.fixedDeltaTime;
+				FaceAway();
 			}
 			else
 			{
-				GetComponent<Rigidbody>().velocity = direction.normalized * velocityMax;
+				if (GetComponent<Rigidbody>().velocity.magnitude < velocityMax)
+				{
+					GetComponent<Rigidbody>().velocity += direction * acceleration * Time.fixedDeltaTime;
+				}
+				else
+				{
+					GetComponent<Rigidbody>().velocity = direction.normalized * velocityMax;
+				}
 			}
 		}
 	}

@@ -48,38 +48,41 @@ public class Arrive_Steering : MonoBehaviour {
 
 	void FixedUpdate () {
 
-		distanceFromTarget = Vector3.Distance(transform.position, target.transform.position);
-		direction = (target.transform.position - transform.position).normalized;
-		aligned = Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) < 1.0f;
+		if (target)
+		{
+			distanceFromTarget = Vector3.Distance(transform.position, target.transform.position);
+			direction = (target.transform.position - transform.position).normalized;
+			aligned = Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) < 1.0f;
 
-		if (GetComponent<Rigidbody>().velocity.magnitude < 1.0f)
-		{
-			if (distanceFromTarget > nearRadius && !aligned)
+			if (GetComponent<Rigidbody>().velocity.magnitude < 1.0f)
 			{
-				Align();
-			}
-			else
-			{
-				Arrive();
-			}
-		}
-		else
-		{
-			if (Mathf.Abs(Vector3.Angle(transform.forward, direction)) <= 30.0f && distanceFromTarget < 10.0f)
-			{
-				Align();
-				Arrive();
-			}
-			else
-			{
-				if (!aligned)
+				if (distanceFromTarget > nearRadius && !aligned)
 				{
-					Stop();
 					Align();
 				}
 				else
 				{
 					Arrive();
+				}
+			}
+			else
+			{
+				if (Mathf.Abs(Vector3.Angle(transform.forward, direction)) <= 30.0f && distanceFromTarget < 10.0f)
+				{
+					Align();
+					Arrive();
+				}
+				else
+				{
+					if (!aligned)
+					{
+						Stop();
+						Align();
+					}
+					else
+					{
+						Arrive();
+					}
 				}
 			}
 		}

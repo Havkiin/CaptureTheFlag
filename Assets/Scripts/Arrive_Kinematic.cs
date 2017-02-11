@@ -29,38 +29,41 @@ public class Arrive_Kinematic : MonoBehaviour {
 	
 	void FixedUpdate () {
 
-		distanceFromTarget = Vector3.Distance(transform.position, target.transform.position);
-		direction = (target.transform.position - transform.position).normalized;
-		aligned = Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) < 1.0f;
+		if (target)
+		{
+			distanceFromTarget = Vector3.Distance(transform.position, target.transform.position);
+			direction = (target.transform.position - transform.position).normalized;
+			aligned = Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) < 1.0f;
 
-		if (GetComponent<Rigidbody>().velocity.magnitude < speed * 0.1f)
-		{
-			if (distanceFromTarget > nearRadius && !aligned)
+			if (GetComponent<Rigidbody>().velocity.magnitude < speed * 0.1f)
 			{
-				Rotate();
-			}
-			else
-			{
-				Arrive();
-			}
-		}
-		else
-		{
-			if (Mathf.Abs(Vector3.Angle(transform.forward, direction)) <= 30.0f && distanceFromTarget < nearRadius)
-			{
-				Rotate();
-				Arrive();
-			}
-			else
-			{
-				if (!aligned)
+				if (distanceFromTarget > nearRadius && !aligned)
 				{
-					Stop();
 					Rotate();
 				}
 				else
 				{
 					Arrive();
+				}
+			}
+			else
+			{
+				if (Mathf.Abs(Vector3.Angle(transform.forward, direction)) <= 30.0f && distanceFromTarget < nearRadius)
+				{
+					Rotate();
+					Arrive();
+				}
+				else
+				{
+					if (!aligned)
+					{
+						Stop();
+						Rotate();
+					}
+					else
+					{
+						Arrive();
+					}
 				}
 			}
 		}

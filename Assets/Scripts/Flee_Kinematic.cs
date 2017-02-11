@@ -20,19 +20,22 @@ public class Flee_Kinematic : MonoBehaviour {
 		turnRadius = 5.0f;
 		rotationSpeedRads = 300.0f;
 	}
-	
-	void FixedUpdate () {
 
-		distanceFromTarget = Vector3.Distance(transform.position, target.transform.position);
-		direction = (transform.position - target.transform.position).normalized;
+	void FixedUpdate()
+	{
+		if (target)
+		{
+			distanceFromTarget = Vector3.Distance(transform.position, target.transform.position);
+			direction = (transform.position - target.transform.position).normalized;
 
-		if (distanceFromTarget > turnRadius && Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) > 1.0f)
-		{
-			transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), rotationSpeedRads * Time.fixedDeltaTime);
-		}
-		else
-		{
-			GetComponent<Rigidbody>().velocity = direction * speed * Time.fixedDeltaTime;
+			if (distanceFromTarget > turnRadius && Quaternion.Angle(transform.rotation, Quaternion.LookRotation(direction)) > 1.0f)
+			{
+				transform.rotation = Quaternion.RotateTowards(transform.rotation, Quaternion.LookRotation(direction), rotationSpeedRads * Time.fixedDeltaTime);
+			}
+			else
+			{
+				GetComponent<Rigidbody>().velocity = direction * speed * Time.fixedDeltaTime;
+			}
 		}
 	}
 }
