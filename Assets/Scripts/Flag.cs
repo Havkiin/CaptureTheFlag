@@ -16,6 +16,7 @@ public class Flag : MonoBehaviour {
 		if (holder)
 		{
 			transform.parent = holder.transform;
+			transform.parent.gameObject.GetComponent<Agent>().hasFlag();
 		}
 	}
 

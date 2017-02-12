@@ -35,7 +35,7 @@ public class Arrive_Steering : MonoBehaviour {
 	void Start () {
 
 		nearRadius = 5.0f;
-		arrivalRadius = 1.0f;
+		arrivalRadius = 0.2f;
 
 		slowDownThreshold = 5.0f;
 		maxRotationSpeedRads = 2.0f;
@@ -144,5 +144,10 @@ public class Arrive_Steering : MonoBehaviour {
 	void Stop ()
 	{
 		GetComponent<Rigidbody>().velocity = Vector3.zero;
+	}
+
+	public void setTarget(GameObject t)
+	{
+		target = t;
 	}
 }

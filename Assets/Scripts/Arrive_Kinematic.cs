@@ -23,7 +23,7 @@ public class Arrive_Kinematic : MonoBehaviour {
 	void Start () {
 
 		nearRadius = 3.0f;
-		arrivalRadius = 1.0f;
+		arrivalRadius = 0.2f;
 		rotationSpeedRads = 300.0f;
 	}
 	
@@ -89,5 +89,10 @@ public class Arrive_Kinematic : MonoBehaviour {
 	void Stop ()
 	{
 		GetComponent<Rigidbody>().velocity = Vector3.zero;
+	}
+
+	public void setTarget(GameObject t)
+	{
+		target = t;
 	}
 }

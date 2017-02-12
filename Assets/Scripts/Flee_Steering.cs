@@ -91,4 +91,9 @@ public class Flee_Steering : MonoBehaviour {
 		goalOrientation = Quaternion.LookRotation(goalFacing, Vector3.up);
 		transform.rotation = Quaternion.RotateTowards(transform.rotation, goalOrientation, rotationSpeedRads);
 	}
+
+	public void setTarget(GameObject t)
+	{
+		target = t;
+	}
 }

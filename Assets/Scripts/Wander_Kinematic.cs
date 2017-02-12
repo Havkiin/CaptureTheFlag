@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Wander : MonoBehaviour {
+public class Wander_Kinematic : MonoBehaviour {
 
 	[SerializeField]
 	float speed;

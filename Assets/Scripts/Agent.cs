@@ -27,6 +27,9 @@ namespace Teams
 		float boundXplus;
 		float boundXminus;
 
+		bool captain;
+		bool flag;
+
 		void Start()
 		{
 
@@ -39,6 +42,8 @@ namespace Teams
 			boundXminus = terrainLeftPos.x - (terrainBoundsLeft.x / 2);
 			boundZplus = terrainLeftPos.z + (terrainBoundsLeft.z / 2);
 			boundZminus = terrainLeftPos.z - (terrainBoundsLeft.z / 2);
+
+			flag = false;
 
 			pointer = Instantiate(pointer);
 		}
@@ -68,6 +73,30 @@ namespace Teams
 				transform.position = new Vector3(transform.position.x, transform.position.y, boundZminus);
 			}
 
+			if (captain)
+			{
+				if (!flag)
+				{
+					if (gameObject.layer == 9)
+					{
+						GetComponent<Wander_Kinematic>().enabled = false;
+						GetComponent<Arrive_Kinematic>().setTarget(GameObject.Find("FlagBlue"));
+						GetComponent<Arrive_Steering>().setTarget(GameObject.Find("FlagBlue"));
+					}
+					else
+					{
+						GetComponent<Wander_Kinematic>().enabled = false;
+						GetComponent<Arrive_Kinematic>().setTarget(GameObject.Find("FlagRed"));
+						GetComponent<Arrive_Steering>().setTarget(GameObject.Find("FlagRed"));
+					}
+				}
+				else
+				{
+					GetComponent<Arrive_Kinematic>().setTarget(transform.parent.gameObject);
+					GetComponent<Arrive_Steering>().setTarget(transform.parent.gameObject);
+				}
+			}
+
 			if (Input.GetKeyDown(KeyCode.K))
 			{
 				gameObject.GetComponent<Flee_Steering>().enabled = false;
@@ -85,6 +114,21 @@ namespace Teams
 				gameObject.GetComponent<Flee_Kinematic>().enabled = false;
 				gameObject.GetComponent<Arrive_Kinematic>().enabled = false;
 			}
+		}
+
+		public void setCaptain ()
+		{
+			captain = true;
+		}
+
+		public bool isCaptain ()
+		{
+			return captain;
+		}
+
+		public void hasFlag ()
+		{
+			flag = true;
 		}
 	}
 }

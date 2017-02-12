@@ -38,4 +38,9 @@ public class Flee_Kinematic : MonoBehaviour {
 			}
 		}
 	}
+
+	public void setTarget(GameObject t)
+	{
+		target = t;
+	}
 }
