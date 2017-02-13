@@ -24,11 +24,15 @@ namespace Teams
 
 		float boundZplus;
 		float boundZminus;
-		float boundXplus;
-		float boundXminus;
+		float boundXRightPlus;
+		float boundXRightMinus;
+		float boundXLeftMinus;
 
 		bool captain;
 		bool flag;
+		bool home;
+		bool kinematic;
+		bool steering;
 
 		void Start()
 		{
@@ -38,12 +42,16 @@ namespace Teams
 			Vector3 terrainRightPos = terrainRight.transform.position;
 			Vector3 terrainLeftPos = terrainLeft.transform.position;
 
-			boundXplus = terrainRightPos.x + (terrainBoundsRight.x / 2);
-			boundXminus = terrainLeftPos.x - (terrainBoundsLeft.x / 2);
+			boundXRightPlus = terrainRightPos.x + (terrainBoundsRight.x / 2);
+			boundXRightMinus = terrainRightPos.x - (terrainBoundsRight.x / 2);
+			boundXLeftMinus = terrainLeftPos.x - (terrainBoundsLeft.x / 2);
 			boundZplus = terrainLeftPos.z + (terrainBoundsLeft.z / 2);
 			boundZminus = terrainLeftPos.z - (terrainBoundsLeft.z / 2);
 
+			home = true;
 			flag = false;
+			kinematic = true;
+			steering = false;
 
 			pointer = Instantiate(pointer);
 		}
@@ -55,13 +63,13 @@ namespace Teams
 			pointer.transform.position = new Vector3(transform.position.x + transform.forward.normalized.x, transform.position.y, transform.position.z + transform.forward.normalized.z);
 			pointer.transform.rotation = Quaternion.LookRotation(transform.forward, transform.right);
 
-			if (transform.position.x < boundXminus)
+			if (transform.position.x < boundXLeftMinus)
 			{
-				transform.position = new Vector3(boundXplus, transform.position.y, transform.position.z);
+				transform.position = new Vector3(boundXRightPlus, transform.position.y, transform.position.z);
 			}
-			else if (transform.position.x > boundXplus)
+			else if (transform.position.x > boundXRightPlus)
 			{
-				transform.position = new Vector3(boundXminus, transform.position.y, transform.position.z);
+				transform.position = new Vector3(boundXLeftMinus, transform.position.y, transform.position.z);
 			}
 
 			if (transform.position.z < boundZminus)
@@ -73,19 +81,52 @@ namespace Teams
 				transform.position = new Vector3(transform.position.x, transform.position.y, boundZminus);
 			}
 
+			if (color.ToString() == "Red")
+			{
+				if (transform.position.x < boundXRightMinus)
+				{
+					home = false;
+				}
+				else
+				{
+					home = true;
+				}
+			}
+			else if (GetComponent<Agent>().color.ToString() == "Blue")
+			{
+				if (transform.position.x > boundXRightMinus)
+				{
+					home = false;
+				}
+				else
+				{
+					home = true;
+				}
+			}
+
 			if (captain)
 			{
 				if (!flag)
 				{
-					if (gameObject.layer == 9)
+					if (kinematic)
 					{
 						GetComponent<Wander_Kinematic>().enabled = false;
-						GetComponent<Arrive_Kinematic>().setTarget(GameObject.Find("FlagBlue"));
-						GetComponent<Arrive_Steering>().setTarget(GameObject.Find("FlagBlue"));
+						GetComponent<Arrive_Kinematic>().enabled = true;
 					}
 					else
 					{
-						GetComponent<Wander_Kinematic>().enabled = false;
+						GetComponent<Wander_Steering>().enabled = false;
+						GetComponent<Arrive_Steering>().enabled = true;
+					}
+
+					if (color.ToString() == "Red")
+					{
+
+						GetComponent<Arrive_Kinematic>().setTarget(GameObject.Find("FlagBlue"));
+						GetComponent<Arrive_Steering>().setTarget(GameObject.Find("FlagBlue"));
+					}
+					else if (color.ToString() == "Blue")
+					{
 						GetComponent<Arrive_Kinematic>().setTarget(GameObject.Find("FlagRed"));
 						GetComponent<Arrive_Steering>().setTarget(GameObject.Find("FlagRed"));
 					}
@@ -96,23 +137,30 @@ namespace Teams
 					GetComponent<Arrive_Steering>().setTarget(transform.parent.gameObject);
 				}
 			}
+			else
+			{
+				if (kinematic)
+				{
+					GetComponent<Wander_Kinematic>().enabled = true;
+					GetComponent<Wander_Steering>().enabled = false;
+				}
+				else
+				{
+					GetComponent<Wander_Steering>().enabled = true;
+					GetComponent<Wander_Kinematic>().enabled = false;
+				}
+			}
 
 			if (Input.GetKeyDown(KeyCode.K))
 			{
-				gameObject.GetComponent<Flee_Steering>().enabled = false;
-				gameObject.GetComponent<Arrive_Steering>().enabled = false;
-
-				gameObject.GetComponent<Flee_Kinematic>().enabled = true;
-				gameObject.GetComponent<Arrive_Kinematic>().enabled = true;
+				kinematic = true;
+				steering = false;
 			}
 
 			if (Input.GetKeyDown(KeyCode.S))
 			{
-				gameObject.GetComponent<Flee_Steering>().enabled = true;
-				gameObject.GetComponent<Arrive_Steering>().enabled = true;
-
-				gameObject.GetComponent<Flee_Kinematic>().enabled = false;
-				gameObject.GetComponent<Arrive_Kinematic>().enabled = false;
+				steering = true;
+				kinematic = false;
 			}
 		}
 
@@ -129,6 +177,29 @@ namespace Teams
 		public void hasFlag ()
 		{
 			flag = true;
+		}
+
+		public float getXPlus ()
+		{
+			return boundXRightPlus;
+		}
+
+		public float getXMinus ()
+		{
+			return boundXLeftMinus;
+		}
+
+		public float getXMiddle ()
+		{
+			return boundXRightMinus;
+		}
+
+		void OnCollisionEnter (Collision col)
+		{
+			if (col.collider.gameObject.GetComponent<Agent>() && col.collider.gameObject.GetComponent<Agent>().color != color && home)
+			{
+				//Freeze the other agent
+			}
 		}
 	}
 }
