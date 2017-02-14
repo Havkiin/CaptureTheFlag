@@ -27,10 +27,13 @@ namespace Teams
 		float boundXRightPlus;
 		float boundXRightMinus;
 		float boundXLeftMinus;
-
+		
 		bool captain;
+		bool helper;
+		bool defender;
 		bool flag;
 		bool home;
+		bool frozen;
 		bool kinematic;
 		bool steering;
 
@@ -63,6 +66,7 @@ namespace Teams
 			pointer.transform.position = new Vector3(transform.position.x + transform.forward.normalized.x, transform.position.y, transform.position.z + transform.forward.normalized.z);
 			pointer.transform.rotation = Quaternion.LookRotation(transform.forward, transform.right);
 
+			//Toroidal arena
 			if (transform.position.x < boundXLeftMinus)
 			{
 				transform.position = new Vector3(boundXRightPlus, transform.position.y, transform.position.z);
@@ -81,6 +85,7 @@ namespace Teams
 				transform.position = new Vector3(transform.position.x, transform.position.y, boundZminus);
 			}
 
+			//Sets home according to team
 			if (color.ToString() == "Red")
 			{
 				if (transform.position.x < boundXRightMinus)
@@ -104,50 +109,106 @@ namespace Teams
 				}
 			}
 
-			if (captain)
+			/***** DECISION MAKING *****/
+
+			//FROZEN (TOUCHED BY AN ENEMY WITHIN ITS HOME)
+			if (frozen)
 			{
-				if (!flag)
+				GetComponent<Arrive_Kinematic>().enabled = false;
+				GetComponent<Flee_Kinematic>().enabled = false;
+				GetComponent<Wander_Kinematic>().enabled = false;
+				GetComponent<Arrive_Steering>().enabled = false;
+				GetComponent<Flee_Steering>().enabled = false;
+				GetComponent<Wander_Steering>().enabled = false;
+			}
+			else {
+				//TEAM CAPTAIN (GETS THE FLAG AND RETURNS IT)
+				if (captain)
+				{
+					//Get the flag
+					if (!flag)
+					{
+						if (kinematic)
+						{
+							GetComponent<Wander_Kinematic>().enabled = false;
+							GetComponent<Arrive_Kinematic>().enabled = true;
+						}
+						else if (steering)
+						{
+							GetComponent<Wander_Steering>().enabled = false;
+							GetComponent<Arrive_Steering>().enabled = true;
+						}
+
+						if (color.ToString() == "Red")
+						{
+
+							GetComponent<Arrive_Kinematic>().setTarget(GameObject.Find("FlagBlue"));
+							GetComponent<Arrive_Steering>().setTarget(GameObject.Find("FlagBlue"));
+						}
+						else if (color.ToString() == "Blue")
+						{
+							GetComponent<Arrive_Kinematic>().setTarget(GameObject.Find("FlagRed"));
+							GetComponent<Arrive_Steering>().setTarget(GameObject.Find("FlagRed"));
+						}
+					}
+					//Return it home
+					else
+					{
+						GetComponent<Arrive_Kinematic>().setTarget(transform.parent.gameObject);
+						GetComponent<Arrive_Steering>().setTarget(transform.parent.gameObject);
+					}
+				}			
+				else if (helper)
+				{
+					foreach (Transform mate in transform.parent)
+					{
+						if (mate.gameObject.GetComponent<Agent>() && mate.gameObject.GetComponent<Agent>().frozen)
+						{
+
+							GetComponent<Arrive_Kinematic>().setTarget(mate.gameObject);
+							GetComponent<Arrive_Steering>().setTarget(mate.gameObject);
+
+							if (kinematic)
+							{
+								GetComponent<Wander_Kinematic>().enabled = false;
+								GetComponent<Arrive_Kinematic>().enabled = true;
+							}
+							else if (steering)
+							{
+								GetComponent<Wander_Steering>().enabled = false;
+								GetComponent<Arrive_Steering>().enabled = true;
+							}
+						}
+						else
+						{
+							if (kinematic)
+							{
+								GetComponent<Arrive_Kinematic>().enabled = false;
+								GetComponent<Wander_Kinematic>().enabled = true;
+								GetComponent<Wander_Steering>().enabled = false;
+							}
+							else if (steering)
+							{
+								GetComponent<Arrive_Steering>().enabled = false;
+								GetComponent<Wander_Steering>().enabled = true;
+								GetComponent<Wander_Kinematic>().enabled = false;
+							}
+						}
+					}
+				}
+				//DEFAULT BEHAVIOUR (WANDER)
+				else
 				{
 					if (kinematic)
 					{
-						GetComponent<Wander_Kinematic>().enabled = false;
-						GetComponent<Arrive_Kinematic>().enabled = true;
-					}
-					else
-					{
+						GetComponent<Wander_Kinematic>().enabled = true;
 						GetComponent<Wander_Steering>().enabled = false;
-						GetComponent<Arrive_Steering>().enabled = true;
 					}
-
-					if (color.ToString() == "Red")
+					else if (steering)
 					{
-
-						GetComponent<Arrive_Kinematic>().setTarget(GameObject.Find("FlagBlue"));
-						GetComponent<Arrive_Steering>().setTarget(GameObject.Find("FlagBlue"));
+						GetComponent<Wander_Steering>().enabled = true;
+						GetComponent<Wander_Kinematic>().enabled = false;
 					}
-					else if (color.ToString() == "Blue")
-					{
-						GetComponent<Arrive_Kinematic>().setTarget(GameObject.Find("FlagRed"));
-						GetComponent<Arrive_Steering>().setTarget(GameObject.Find("FlagRed"));
-					}
-				}
-				else
-				{
-					GetComponent<Arrive_Kinematic>().setTarget(transform.parent.gameObject);
-					GetComponent<Arrive_Steering>().setTarget(transform.parent.gameObject);
-				}
-			}
-			else
-			{
-				if (kinematic)
-				{
-					GetComponent<Wander_Kinematic>().enabled = true;
-					GetComponent<Wander_Steering>().enabled = false;
-				}
-				else
-				{
-					GetComponent<Wander_Steering>().enabled = true;
-					GetComponent<Wander_Kinematic>().enabled = false;
 				}
 			}
 
@@ -174,6 +235,21 @@ namespace Teams
 			return captain;
 		}
 
+		public void setHelper ()
+		{
+			helper = true;
+		}
+
+		public bool isHelper()
+		{
+			return helper;
+		}
+
+		public void setDefender ()
+		{
+			defender = true;
+		}
+
 		public void hasFlag ()
 		{
 			flag = true;
@@ -194,11 +270,27 @@ namespace Teams
 			return boundXRightMinus;
 		}
 
+		public bool isFrozen()
+		{
+			return frozen;
+		}
+
 		void OnCollisionEnter (Collision col)
 		{
-			if (col.collider.gameObject.GetComponent<Agent>() && col.collider.gameObject.GetComponent<Agent>().color != color && home)
+			if (col.collider.gameObject.GetComponent<Agent>() && !home)
 			{
-				//Freeze the other agent
+				if (col.collider.gameObject.GetComponent<Agent>().color != color)
+				{
+					//Get frozen by opponent
+					frozen = true;
+					gameObject.GetComponent<Rigidbody>().isKinematic = true;
+				}
+				else if (col.collider.gameObject.GetComponent<Agent>().color == color)
+				{
+					//Get unfrozen by teammate
+					frozen = false;
+					gameObject.GetComponent<Rigidbody>().isKinematic = false;
+				}
 			}
 		}
 	}

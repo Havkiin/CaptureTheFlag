@@ -10,13 +10,25 @@ public class Flag : MonoBehaviour {
 
 	[SerializeField]
 	GameObject holder;
+
+	Vector3 startPos;
 	
+	void Start ()
+	{
+		startPos = transform.position;
+	}
+
 	void Update () {
 		
 		if (holder)
 		{
 			transform.parent = holder.transform;
 			transform.parent.gameObject.GetComponent<Agent>().hasFlag();
+
+			if (holder.GetComponent<Agent>().isFrozen())
+			{
+				transform.position = startPos;
+			}
 		}
 	}
 
