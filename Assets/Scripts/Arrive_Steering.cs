@@ -35,7 +35,7 @@ public class Arrive_Steering : MonoBehaviour {
 	void Start () {
 
 		nearRadius = 5.0f;
-		arrivalRadius = 0.2f;
+		arrivalRadius = 0.6f;
 
 		slowDownThreshold = 5.0f;
 		maxRotationSpeedRads = 2.0f;

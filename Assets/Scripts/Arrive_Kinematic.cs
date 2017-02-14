@@ -23,7 +23,7 @@ public class Arrive_Kinematic : MonoBehaviour {
 	void Start () {
 
 		nearRadius = 3.0f;
-		arrivalRadius = 0.2f;
+		arrivalRadius = 0.6f;
 		rotationSpeedRads = 300.0f;
 	}
 	

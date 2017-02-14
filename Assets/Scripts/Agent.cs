@@ -22,6 +22,9 @@ namespace Teams
 		[SerializeField]
 		public Team color;
 
+		[SerializeField]
+		GameObject otherTeam;
+
 		float boundZplus;
 		float boundZminus;
 		float boundXRightPlus;
@@ -121,7 +124,8 @@ namespace Teams
 				GetComponent<Flee_Steering>().enabled = false;
 				GetComponent<Wander_Steering>().enabled = false;
 			}
-			else {
+			else
+			{
 				//TEAM CAPTAIN (GETS THE FLAG AND RETURNS IT)
 				if (captain)
 				{
@@ -157,14 +161,14 @@ namespace Teams
 						GetComponent<Arrive_Kinematic>().setTarget(transform.parent.gameObject);
 						GetComponent<Arrive_Steering>().setTarget(transform.parent.gameObject);
 					}
-				}			
+				}
+				//HELPER (UNFREEZES CAPTAIN)
 				else if (helper)
 				{
 					foreach (Transform mate in transform.parent)
 					{
 						if (mate.gameObject.GetComponent<Agent>() && mate.gameObject.GetComponent<Agent>().frozen)
 						{
-
 							GetComponent<Arrive_Kinematic>().setTarget(mate.gameObject);
 							GetComponent<Arrive_Steering>().setTarget(mate.gameObject);
 
@@ -196,18 +200,40 @@ namespace Teams
 						}
 					}
 				}
-				//DEFAULT BEHAVIOUR (WANDER)
-				else
+				//DEFENDER (FREEZES OPPONENTS WITHIN ITS BASE)
+				else if (defender)
 				{
-					if (kinematic)
+					foreach (Transform opponent in otherTeam.transform)
 					{
-						GetComponent<Wander_Kinematic>().enabled = true;
-						GetComponent<Wander_Steering>().enabled = false;
-					}
-					else if (steering)
-					{
-						GetComponent<Wander_Steering>().enabled = true;
-						GetComponent<Wander_Kinematic>().enabled = false;
+						if (opponent.gameObject.GetComponent<Agent>() && !opponent.gameObject.GetComponent<Agent>().home && !opponent.gameObject.GetComponent<Agent>().frozen)
+						{
+							GetComponent<Arrive_Kinematic>().setTarget(opponent.gameObject);
+							GetComponent<Arrive_Steering>().setTarget(opponent.gameObject);
+
+							if (kinematic)
+							{
+								GetComponent<Wander_Kinematic>().enabled = false;
+								GetComponent<Arrive_Kinematic>().enabled = true;
+							}
+							else if (steering)
+							{
+								GetComponent<Wander_Steering>().enabled = false;
+								GetComponent<Arrive_Steering>().enabled = true;
+							}
+						}
+						else
+						{
+							if (kinematic)
+							{
+								GetComponent<Wander_Kinematic>().enabled = true;
+								GetComponent<Wander_Steering>().enabled = false;
+							}
+							else if (steering)
+							{
+								GetComponent<Wander_Steering>().enabled = true;
+								GetComponent<Wander_Kinematic>().enabled = false;
+							}
+						}
 					}
 				}
 			}
@@ -275,6 +301,11 @@ namespace Teams
 			return frozen;
 		}
 
+		public bool isHome ()
+		{
+			return home;
+		}
+
 		void OnCollisionEnter (Collision col)
 		{
 			if (col.collider.gameObject.GetComponent<Agent>() && !home)
@@ -283,7 +314,7 @@ namespace Teams
 				{
 					//Get frozen by opponent
 					frozen = true;
-					gameObject.GetComponent<Rigidbody>().isKinematic = true;
+					//gameObject.GetComponent<Rigidbody>().isKinematic = true;
 				}
 				else if (col.collider.gameObject.GetComponent<Agent>().color == color)
 				{
